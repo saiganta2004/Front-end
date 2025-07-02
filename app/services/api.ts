@@ -1,8 +1,14 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { LoginRequest, RegisterRequest, AttendanceMarkRequest } from '../types';
 
+// For demo purposes, you can switch between real API and mock API
+const USE_MOCK_API = process.env.NODE_ENV === 'production' || !process.env.NEXT_PUBLIC_BACKEND_URL;
+
+// Mock API import
+import { mockApiService } from './mock-api';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -56,6 +62,11 @@ const apiService = {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     data?: any
   ) {
+    // Use mock API in production or when backend URL is not set
+    if (USE_MOCK_API) {
+      return mockApiService.makeRequest(endpoint, method, data);
+    }
+
     try {
       // The interceptor now handles the Authorization header automatically
       const response = await api({ url: endpoint, method, data });
